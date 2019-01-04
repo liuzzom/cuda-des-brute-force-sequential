@@ -10,11 +10,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cuda.h>
-#include <crypt.h> // contains crypt function
 #include <string.h>
 #include <time.h>
-#define HWS 14 // hashed word size
-#define WS 9 // word size
+#define WS 8 // word size
 #define CN 62 // characters number
 
 #include "cuda_runtime.h"
@@ -35,10 +33,7 @@ void error(char *message){
 
 // convert a string of 8 chars into an uint64_t
 uint64_t strtouint64(char *string){
-	//puts("clear");
-	//printf("%s\n", string);
 	uint64_t uword = 0;
-	//puts("test");
 	for(int i = 0; i < 8; i++){
 		uint8_t uchar = (uint8_t) (int) string[i];
 		uword += uchar;
@@ -46,7 +41,6 @@ uint64_t strtouint64(char *string){
 			uword<<=8;
 		}
 	}
-	//bits_print_grouped(uword, 8, 64);
 	return uword;
 }
 
@@ -54,21 +48,26 @@ int main(int argc, char *argv[]) {
 	char *password = (char*)malloc(WS * sizeof(char)); // contains the target
 	uint64_t upassword; // uint64_t version of the target
 	uint64_t crypted_target; // uint64_t version of the crypted target
+
 	char *curr_word = (char*)malloc(WS * sizeof(char)); // readed from dictionary or generated
 	uint64_t uint_curr_word; // uint64_t version of curr_word
 	uint64_t hash_word; // hash of curr_word
+
 	FILE *dictionary;
+
 	int a, b, c, d, e, f, g, h;
 	char characters[CN] = {'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 						   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 						   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
+	password = "aabaaaaa";
+
 	// verify if the user inserted eight characters password
-	password = "password";
 	if((int)strlen(password) != 8){
 		error("error: insert an eight characters password");
 	}
 	printf("target:%s\n", password);
+
 	// conversion and encryption
 	upassword = strtouint64(password);
 	crypted_target = full_des_encode_block(upassword, upassword);
@@ -118,7 +117,7 @@ int main(int argc, char *argv[]) {
 		for(b = 0; b < CN; b++){
 			for(c = 0; c < CN; c++){
 				for(d = 0; d < CN; d++){
-					for(e = 0; e < CN; c++){
+					for(e = 0; e < CN; e++){
 						for(f = 0; f < CN; f++){
 							for(g = 0; g < CN; g++){
 								for(h = 0; h < CN; h++){
@@ -130,8 +129,6 @@ int main(int argc, char *argv[]) {
 									curr_word[5] = characters[f];
 									curr_word[6] = characters[g];
 									curr_word[7] = characters[h];
-									curr_word[8] = '\0';
-
 
 									// DES hash
 									uint_curr_word = strtouint64(curr_word);
